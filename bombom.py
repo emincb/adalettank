@@ -6,6 +6,13 @@ import os
 import cv2
 import numpy as np
 import math
+def locate_battle_end():
+    try:
+        location = pyautogui.locateOnScreen('C:\\Users\\eminb\\Desktop\\adalettank\\battle_end.png')
+        return location
+    except Exception as e:
+        print(f"Error locating battle_end.png: {e}")
+        return None
 def locate_image_bool(image):
     # Join the directory path with the image file name
     image_path = os.path.join('C:\\Users\\eminb\\Desktop\\adalettank', image)
@@ -220,10 +227,14 @@ def game():
                     print(f"{shape} not found.")
 
         # Check if 'battle_end.png' is found
-        battle_end_location = locate_image('battle_end.png')
+        battle_end_location = locate_battle_end()
         if battle_end_location is not None:
             print("Battle ended.")
             break
+
+        # Pause for a bit before the next iteration
+        time.sleep(1)
+
 def energy():
     # Locate and click on 'backpack.png' and 'accesory.png'
     images = ['backpack.png', 'accesory.png']
