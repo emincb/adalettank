@@ -9,6 +9,31 @@ import math
 import datetime
 import pytesseract
 pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
+
+# This will be our flag to signal the thread to stop
+stop_thread = False
+
+def press_keys():
+    global stop_thread
+    while not stop_thread:
+        pyautogui.press('z')
+        pyautogui.press('x')
+        pyautogui.press('r')  # Presses the space bar once
+        pyautogui.press('b')  # Presses the space bar once
+        pyautogui.press('3')  # Presses the space bar once  
+        pyautogui.press('4')  # Presses the space bar once
+
+        # To hold a button
+        pyautogui.keyDown('space')  
+        time.sleep(4)  
+        pyautogui.keyUp('space')  
+
+# Create a thread that will run the press_keys function
+keys_thread = threading.Thread(target=press_keys)
+
+# Start the thread
+keys_thread.start()
+
 def locate_battle_end():
     try:
         location = pyautogui.locateOnScreen('C:\\Users\\eminb\\Desktop\\adalettank\\battle_end.png')
@@ -154,10 +179,9 @@ def startup():
         # Locate 'surukleme.png' and move the mouse cursor to that position
         locate_and_move('surukleme.png')
 
-        click_until_found('sirk.png')
+        click_until_found('yeti.png')
 
-        # Locate and click on 'sirk.png' and 'tamam.png'
-        locate_and_click('sirk.png')
+        locate_and_click('yeti.png')
         locate_and_click('tamam.png')
 
         # Locate and click on 'basla.png'
@@ -181,6 +205,7 @@ def startup():
 
 def game():
     while True:
+        time.sleep(5) zx
         # Capture the region of the screen where the radar is located
         radar_image = pyautogui.screenshot(region=(1492,172,183,134))
         radar_location = (1492,172,183,134)  # Assign the tuple to radar_location
@@ -251,29 +276,15 @@ def game():
                         file.write(f'{angle}\n')
                     print(f"The angle between the blue circle and {shape} is {angle} degrees")
 
-                    # Subtract the angle from the number
+                    
                     difference = number - angle
-
-                    # Press the up or down arrow key to adjust the angle
                     if difference > 0:
                         for _ in range(int(abs(difference))):
                             pyautogui.press('down')
                     elif difference < 0:
                         for _ in range(int(abs(difference))):
                             pyautogui.press('up')
-
-                    # To press a button
-                    pyautogui.press('z')  
-                    pyautogui.press('x')
-                    pyautogui.press('r')  # Presses the space bar once
-                    pyautogui.press('b')  # Presses the space bar once
-                    pyautogui.press('3')  # Presses the space bar once  
-                    pyautogui.press('4')  # Presses the space bar once
-
-                    # To hold a button
-                    pyautogui.keyDown('space')  
-                    time.sleep(4)  
-                    pyautogui.keyUp('space')  
+  
                 else:
                     print(f"{shape} not found.")
 
@@ -281,10 +292,9 @@ def game():
         battle_end_location = locate_battle_end()
         if battle_end_location is not None:
             print("Battle ended.")
-            break
-
-        # Pause for a bit before the next iteration
-        time.sleep(1)
+            stop_thread = True  # Signal the thread to stop
+            zxkeys_thread.join()
+            break  # Exit the loop if the battle has ended
 
 def energy():
     # Locate and click on 'backpack.png' and 'accesory.png'
