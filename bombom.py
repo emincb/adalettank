@@ -1,5 +1,5 @@
 import pyautogui
-import pygetwindow as gw
+import pygetwindow as gwzxr
 import threading
 import time
 import os
@@ -204,8 +204,13 @@ def startup():
     game()
 
 def game():
+     # Create a thread that will run the press_keys function
+    keys_thread = threading.Thread(target=press_keys)
+
+    # Start the thread
+    keys_thread.start() 
     while True:
-        time.sleep(5) zx
+        time.sleep(5) 
         # Capture the region of the screen where the radar is located
         radar_image = pyautogui.screenshot(region=(1492,172,183,134))
         radar_location = (1492,172,183,134)  # Assign the tuple to radar_location
@@ -293,7 +298,7 @@ def game():
         if battle_end_location is not None:
             print("Battle ended.")
             stop_thread = True  # Signal the thread to stop
-            zxkeys_thread.join()
+            keys_thread.join()
             break  # Exit the loop if the battle has ended
 
 def energy():
