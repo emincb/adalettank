@@ -6,6 +6,7 @@ import os
 import cv2
 import numpy as np
 import math
+import datetime
 def locate_battle_end():
     try:
         location = pyautogui.locateOnScreen('C:\\Users\\eminb\\Desktop\\adalettank\\battle_end.png')
@@ -186,8 +187,9 @@ def game():
             if len(radar_image.shape) == 3:  # If the image is a color image
                 radar_image = cv2.cvtColor(radar_image, cv2.COLOR_BGR2GRAY)
 
-            # Save the radar image for debugging
-            cv2.imwrite('debug_radar_image.png', radar_image)
+            # Save the radar image for debugging with a unique timestamp
+            timestamp = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
+            cv2.imwrite(f'debug_radar_image_{timestamp}.png', radar_image)
 
             # Load the template image in grayscale
             template = cv2.imread('blue_circle.png', 0)
@@ -213,8 +215,8 @@ def game():
                 if shape_location is not None:
                     print(f"{shape} found.")
 
-                    # Save the shape image for debugging
-                    cv2.imwrite(f'debug_{shape}', shape_image)
+                    # Save the entire radar image for debugging
+                    cv2.imwrite('debug_radar_image1.png', radar_image)
 
                     # Calculate the coordinates of the center of the blue circle and the shape
                     blue_circle_center = (blue_circle_location[0] + template.shape[1] // 2, blue_circle_location[1] + template.shape[0] // 2)
@@ -223,6 +225,17 @@ def game():
                     # Calculate the angle between the line connecting the blue circle and the shape and the x-axis
                     angle = calculate_angle(blue_circle_center, shape_center)
                     print(f"The angle between the blue circle and {shape} is {angle} degrees")
+                    # To press a button
+                    pyautogui.press('z')  
+                    pyautogui.press('x')
+                    pyautogui.press('r')  # Presses the space bar once
+                    pyautogui.press('b')  # Presses the space bar once
+                    pyautogui.press('3')  # Presses the space bar once  
+                    pyautogui.press('4')  # Presses the space bar once
+                    # To hold a button
+                    pyautogui.keyDown('space')  
+                    time.sleep(4)  
+                    pyautogui.keyUp('space')  
                 else:
                     print(f"{shape} not found.")
 
