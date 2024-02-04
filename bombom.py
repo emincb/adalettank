@@ -7,6 +7,8 @@ import cv2
 import numpy as np
 import math
 import datetime
+import pytesseract
+pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
 def locate_battle_end():
     try:
         location = pyautogui.locateOnScreen('C:\\Users\\eminb\\Desktop\\adalettank\\battle_end.png')
@@ -32,16 +34,19 @@ def locate_image_bool(image):
             print(f"Could not find {image} on the screen, retrying...")
             time.sleep(1)  # Wait for a second before retrying to avoid excessive CPU usage     
 def calculate_angle(point1, point2):
-    # Calculate the slope of the line between point1 and point2
-    slope = (point2[1] - point1[1]) / (point2[0] - point1[0])
+    if point2[0] - point1[0] == 0:  # If the x-coordinates of the two points are the same
+        return 90
+    else:
+        # Calculate the slope of the line between point1 and point2
+        slope = (point2[1] - point1[1]) / (point2[0] - point1[0])
 
-    # Calculate the angle in radians between the line and the x-axis
-    angle_radians = math.atan(slope)
+        # Calculate the angle in radians between the line and the x-axis
+        angle_radians = math.atan(slope)
 
-    # Convert the angle to degrees
-    angle_degrees = math.degrees(angle_radians)
+        # Convert the angle to degrees
+        angle_degrees = math.degrees(angle_radians)
 
-    return abs(angle_degrees)
+        return abs(angle_degrees)
 
 def click_until_found(image):
     # Join the directory path with the image file name
@@ -215,8 +220,26 @@ def game():
                 if shape_location is not None:
                     print(f"{shape} found.")
 
+                    # Capture the region of the screen where the number is located
+                    number_image = pyautogui.screenshot(region=(289,935,43,23))
+
+                    # Convert the PIL.Image object to a numpy array and ensure it's grayscale
+                    number_image = np.array(number_image)
+                    if len(number_image.shape) == 3:  # If the image is a color image
+                        number_image = cv2.cvtColor(number_image, cv2.COLOR_BGR2GRAY)
+
+                    # Use Tesseract to do OCR on the image
+                    number_text = pytesseract.image_to_string(number_image, config='--psm 6 -c tessedit_char_whitelist=0123456789')
+
+                    # Convert the extracted text to a number
+                    try:
+                        number = int(number_text)
+                    except ValueError:
+                        print("Could not extract a number from the image.")
+                        continue
+
                     # Save the entire radar image for debugging
-                    cv2.imwrite('debug_radar_image1.png', radar_image)
+                    # cv2.imwrite('debug_radar_image1.png', radar_image)
 
                     # Calculate the coordinates of the center of the blue circle and the shape
                     blue_circle_center = (blue_circle_location[0] + template.shape[1] // 2, blue_circle_location[1] + template.shape[0] // 2)
@@ -224,7 +247,21 @@ def game():
 
                     # Calculate the angle between the line connecting the blue circle and the shape and the x-axis
                     angle = calculate_angle(blue_circle_center, shape_center)
+                    with open('angles.txt', 'a') as file:
+                        file.write(f'{angle}\n')
                     print(f"The angle between the blue circle and {shape} is {angle} degrees")
+
+                    # Subtract the angle from the number
+                    difference = number - angle
+
+                    # Press the up or down arrow key to adjust the angle
+                    if difference > 0:
+                        for _ in range(int(abs(difference))):
+                            pyautogui.press('down')
+                    elif difference < 0:
+                        for _ in range(int(abs(difference))):
+                            pyautogui.press('up')
+
                     # To press a button
                     pyautogui.press('z')  
                     pyautogui.press('x')
@@ -232,6 +269,7 @@ def game():
                     pyautogui.press('b')  # Presses the space bar once
                     pyautogui.press('3')  # Presses the space bar once  
                     pyautogui.press('4')  # Presses the space bar once
+
                     # To hold a button
                     pyautogui.keyDown('space')  
                     time.sleep(4)  
